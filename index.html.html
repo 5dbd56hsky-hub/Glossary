@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="kk" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Үштілді Терминологиялық Глоссарий | 24KZ Грант Ережелері</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col transition-colors duration-200">
+
+    <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-sky-600 to-blue-700 text-white p-2.5 rounded-xl shadow-md">
+                        <i class="fa-solid me-0 fa-book-bookmark text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight text-slate-900 dark:text-white" id="appTitle">Терминологиялық Глоссарий</h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block" id="appSubtitle">Грант түлектерінің жұмыспен өтеу ережелері (24KZ)</p>
+                    </div>
+                </div>
+
+                <!-- Controls: Language, Dark Mode, Add Button -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- UI Language Picker -->
+                    <div class="relative">
+                        <select id="uiLangSelect" onchange="changeUILanguage(this.value)" class="bg-slate-100 dark:bg-slate-700 border-none text-xs sm:text-sm font-medium rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-sky-500 cursor-pointer">
+                            <option value="kk">🇰🇿 Қазақша</option>
+                            <option value="ru">🇷🇺 Русский</option>
+                            <option value="en">🇬🇧 English</option>
+                        </select>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition" title="Темный режим">
+                        <i id="themeIcon" class="fa-solid fa-moon text-lg"></i>
+                    </button>
+
+                    <!-- Add New Term Button -->
+                    <button onclick="openModal()" class="bg-sky-600 hover:bg-sky-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center space-x-1.5 shadow-sm transition">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="hidden sm:inline" id="addBtnText">Жаңа термин</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col space-y-6">
+
+        <!-- Search Bar & Primary Actions -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                </div>
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Терминді, анықтаманы немесе кілт сөзді іздеу..." 
+                       class="w-full pl-11 pr-10 py-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-sky-500 focus:outline-none transition">
+                <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Filters & Views Toggle Row -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                <!-- Category Filter -->
+                <div class="flex items-center space-x-2 overflow-x-auto custom-scrollbar pb-1 max-w-full">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap" id="categoryLabel">Санат:</span>
+                    <div id="categoryContainer" class="flex items-center space-x-1.5">
+                        <!-- Dynamic Categories populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Export & View Mode Buttons -->
+                <div class="flex items-center space-x-2 ml-auto">
+                    <!-- Export Dropdown -->
+                    <div class="relative inline-block text-left">
+                        <button onclick="toggleExportMenu()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-xs font-medium flex items-center space-x-1.5 text-slate-700 dark:text-slate-200 transition">
+                            <i class="fa-solid fa-download"></i>
+                            <span id="exportLabel">Экспорт</span>
+                            <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                        </button>
+                        <div id="exportMenu" class="hidden absolute right-0 mt-2 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 z-20 py-1 text-xs">
+                            <button onclick="exportData('csv')" class="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center space-x-2"><i class="fa-solid fa-file-csv text-green-600"></i><span>CSV формат</span></button>
+                            <button onclick="exportData('json')" class="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center space-x-2"><i class="fa-solid fa-file-code text-blue-500"></i><span>JSON формат</span></button>
+                        </div>
+                    </div>
+
+                    <!-- View Switcher -->
+                    <div class="flex bg-slate-100 dark:bg-slate-700 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-600">
+                        <button id="cardViewBtn" onclick="setViewMode('card')" class="p-1.5 rounded-md text-xs font-medium transition bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm">
+                            <i class="fa-solid fa-border-all"></i>
+                        </button>
+                        <button id="tableViewBtn" onclick="setViewMode('table')" class="p-1.5 rounded-md text-xs font-medium transition text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                            <i class="fa-solid fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alphabet Bar -->
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                <div class="flex items-center space-x-1 overflow-x-auto custom-scrollbar py-1 text-xs" id="alphabetBar">
+                    <!-- Alphabet buttons added dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs sm:text-sm text-slate-500 dark:text-slate-400 px-1">
+            <div>
+                <span id="resultsCount">0</span> <span id="termsFoundText">термин табылды</span>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span id="activeFiltersBadge" class="hidden px-2 py-0.5 bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 rounded-full text-xs font-medium">
+                    Сүзгі белсенді
+                </span>
+                <button onclick="resetFilters()" class="text-sky-600 dark:text-sky-400 hover:underline text-xs flex items-center space-x-1">
+                    <i class="fa-solid fa-arrows-rotate text-[10px]"></i>
+                    <span id="resetFiltersText">Сүзгіні тазалау</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Card View Container -->
+        <div id="cardViewContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Dynamic term cards -->
+        </div>
+
+        <!-- Table View Container -->
+        <div id="tableViewContainer" class="hidden bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold">
+                            <th class="p-3 sm:p-4">Қазақша (KK)</th>
+                            <th class="p-3 sm:p-4">Русский (RU)</th>
+                            <th class="p-3 sm:p-4">English (EN)</th>
+                            <th class="p-3 sm:p-4">Санат</th>
+                            <th class="p-3 sm:p-4 text-center">Әрекеттер</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-slate-700/60">
+                        <!-- Dynamic table rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden py-16 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <i class="fa-solid fa-folder-open text-4xl text-slate-300 dark:text-slate-600 mb-3"></i>
+            <h3 class="text-base font-semibold text-slate-700 dark:text-slate-200" id="emptyTitle">Ештеңе табылмады</h3>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1" id="emptySubtitle">Іздеу сұранысын немесе сүзгіні өзгертіп көріңіз</p>
+        </div>
+
+    </main>
+
+    <div id="termModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden transform transition-all">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
+                <h3 class="font-bold text-base text-slate-800 dark:text-white" id="modalTitle">Жаңа термин қосу</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Form -->
+            <form id="addTermForm" onsubmit="saveTerm(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Санат *</label>
+                    <select id="modalCategory" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                        <option value="Заңнама & Ережелер">Заңнама & Ережелер</option>
+                        <option value="Білім & Грант">Білім & Грант</option>
+                        <option value="Жұмыспен қамту">Жұмыспен қамту</option>
+                        <option value="Әлеуметтік мәртебе">Әлеуметтік мәртебе</option>
+                        <option value="Әскери қызмет">Әскери қызмет</option>
+                    </select>
+                </div>
+
+                <!-- Kazakh Term -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-sky-600 dark:text-sky-400">Қазақша термин *</label>
+                    <input type="text" id="termKK" required placeholder="Мысалы: Бос жұмыс орны" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    <textarea id="defKK" rows="2" placeholder="Қазақша анықтамасы немесе мысал..." class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+                </div>
+
+                <!-- Russian Term -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-blue-600 dark:text-blue-400">Русский термин *</label>
+                    <input type="text" id="termRU" required placeholder="Например: Вакантное рабочее место" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    <textarea id="defRU" rows="2" placeholder="Определение на русском..." class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+                </div>
+
+                <!-- English Term -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-emerald-600 dark:text-emerald-400">English term *</label>
+                    <input type="text" id="termEN" required placeholder="Example: Job vacancy" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    <textarea id="defEN" rows="2" placeholder="English definition or context..." class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg" id="modalCancelBtn">Бас тарту</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-medium bg-sky-600 hover:bg-sky-700 text-white rounded-lg shadow-sm" id="modalSaveBtn">Сақтау</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 text-xs sm:text-sm border border-slate-700">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toastMessage">Хабарлама</span>
+    </div>
+
+    <script>
+        // Initial Pre-populated Dataset based on 24KZ news material
+        const initialTerms = [
+            {
+                id: "1",
+                category: "Білім & Грант",
+                kk: "Мемлекеттік білім беру тапсырысы",
+                ru: "Государственный образовательный заказ",
+                en: "State-funded education scheme",
+                defKK: "Мемлекет есебінен мамандар даярлауға бөлінетін мақсатты қаржыландыру гранты.",
+                defRU: "Целевое финансирование подготовки специалистов за счет средств государственного бюджета.",
+                defEN: "State grant provided for training qualified professionals funded by the public budget."
+            },
+            {
+                id: "2",
+                category: "Заңнама & Ережелер",
+                kk: "Міндетті жұмыспен өтеу",
+                ru: "Обязательная отработка",
+                en: "Mandatory employment obligation",
+                defKK: "Грант бойынша оқуды аяқтаған соң белгіленген мерзімде жұмыс істеу заңды міндеттемесі.",
+                defRU: "Законодательное обязательство отработать установленный срок после завершения обучения по гранту.",
+                defEN: "Statutory requirement to work for a specified period upon completion of state-funded education."
+            },
+            {
+                id: "3",
+                category: "Заңнама & Ережелер",
+                kk: "Жұмыспен өтеу мерзімі",
+                ru: "Срок обязательной отработки",
+                en: "Mandatory service period",
+                defKK: "Түлектің ұйымдарда жұмыспен өтеуге тиісті заңды уақыт аралығы (әдетте 3 жыл).",
+                defRU: "Установленный законом период времени (обычно 3 года), в течение которого выпускник обязан отработать.",
+                defEN: "Legally specified duration (typically 3 years) for which a graduate must fulfill employment."
+            },
+            {
+                id: "4",
+                category: "Білім & Грант",
+                kk: "Оқуға түскендер",
+                ru: "Поступившие на обучение",
+                en: "Students admitted to a programme",
+                defKK: "Конкурс нәтижесінде білім беру ұйымдарына қабылданған білім алушылар.",
+                defRU: "Лица, зачисленные в образовательные организации по результатам конкурса.",
+                defEN: "Individuals enrolled into educational institutions based on competitive selection results."
+            },
+            {
+                id: "5",
+                category: "Заңнама & Ережелер",
+                kk: "Күшіне енген түзетулер",
+                ru: "Вступившие в силу поправки",
+                en: "Amendments that entered into force",
+                defKK: "Нормативтік-құқықтық актілерге енгізіліп, ресми қолданысқа берілген өзгерістер.",
+                defRU: "Изменения в нормативно-правовых актах, официально вступившие в юридическое действие.",
+                defEN: "Official legislative updates and modifications that have become legally operational."
+            },
+            {
+                id: "6",
+                category: "Білім & Грант",
+                kk: "Ғылыми ұйым",
+                ru: "Научная организация",
+                en: "Research organisation",
+                defKK: "Ғылыми-зерттеу және тәжірибелік-конструкторлық жұмыстарды жүзеге асыратын заңды тұлға.",
+                defRU: "Юридическое лицо, осуществляющее научно-исследовательские и опытно-конструкторские работы.",
+                defEN: "An entity performing scientific research and experimental development tasks."
+            },
+            {
+                id: "7",
+                category: "Жұмыспен қамту",
+                kk: "Мемлекеттік орган",
+                ru: "Государственный орган",
+                en: "Government agency",
+                defKK: "Мемлекет атынан билік функцияларын жүзеге асыратын ресми ұйым.",
+                defRU: "Официальная организация, осуществляющая государственные функции и полномочия.",
+                defEN: "A public authority executing state administrative functions and governance duties."
+            },
+            {
+                id: "8",
+                category: "Әскери қызмет",
+                kk: "Әскери қызметші",
+                ru: "Военнослужащий",
+                en: "Military service member",
+                defKK: "Қарулы күштер құрамында әскери міндетін атқаратын азамат.",
+                defRU: "Гражданин, проходящий воинскую службу в составе Вооруженных сил.",
+                defEN: "An individual serving in the armed forces and military departments."
+            },
+            {
+                id: "9",
+                category: "Әскери қызмет",
+                kk: "Келісімшарт бойынша әскери қызмет",
+                ru: "Военная служба по контракту",
+                en: "Military service under contract",
+                defKK: "Әскери органдармен жасалған келісімшарт негізінде ерікті түрде атқарылатын қызмет.",
+                defRU: "Добровольная воинская служба, проходимая на основе заключенного контракта.",
+                defEN: "Voluntary military duty rendered on a contractual agreement basis."
+            },
+            {
+                id: "10",
+                category: "Әлеуметтік мәртебе",
+                kk: "Жұмыспен өтеуден босату",
+                ru: "Освобождение от отработки",
+                en: "Exemption from mandatory service",
+                defKK: "Заңмен белгіленген айрықша жағдайлар бойынша міндетті жұмыстан босатылу құқығы.",
+                defRU: "Право на освобождение от обязательного трудоустройства по законным основаниям.",
+                defEN: "Legal permission or right waiving the obligation to perform mandatory work placement."
+            },
+            {
+                id: "11",
+                category: "Әлеуметтік мәртебе",
+                kk: "Мүгедектігі бар адам",
+                ru: "Лицо с инвалидностью",
+                en: "Person with a disability",
+                defKK: "Денсаулығы бұзылуына байланысты тіршілік-тынысы шектелген, әлеуметтік қорғауға мұқтаж тұлға.",
+                defRU: "Лицо, имеющее нарушение здоровья со стойким расстройством функций организма.",
+                defEN: "An individual experiencing long-term physical or sensory impairments requiring protection."
+            },
+            {
+                id: "12",
+                category: "Әлеуметтік мәртебе",
+                kk: "Күтім жасайтын жәрдемақы",
+                ru: "Пособие по уходу",
+                en: "Caregiver allowance",
+                defKK: "Мұқтаж жандарға немесе балаға күтім жасаушы тұлғаларға төленетін әлеуметтік төлем.",
+                defRU: "Социальная выплата лицам, осуществляющим уход за нуждающимися гражданами или ребенком.",
+                defEN: "Financial benefit granted to individuals providing care to dependents or disabled family members."
+            },
+            {
+                id: "13",
+                category: "Жұмыспен қамту",
+                kk: "Бос жұмыс орны",
+                ru: "Вакантное рабочее место",
+                en: "Job vacancy",
+                defKK: "Жұмыс берушіде бар және түлектерді орналастыруға арналған бос қызмет орны.",
+                defRU: "Свободная должность у работодателя, доступная для трудоустройства.",
+                defEN: "An unoccupied post or employment position available at an employer organization."
+            },
+            {
+                id: "14",
+                category: "Жұмыспен қамту",
+                kk: "Кадр тапшылығы бар өңір",
+                ru: "Регион с дефицитом кадров",
+                en: "Region experiencing staff shortages",
+                defKK: "Белгілі бір мамандықтар бойынша жұмысшы күші жетіспейтін аумақ немесе облыс.",
+                defRU: "Территория с острой нехваткой квалифицированных специалистов определенных профилей.",
+                defEN: "An administrative area or region suffering from a deficit of qualified workforce."
+            },
+            {
+                id: "15",
+                category: "Заңнама & Ережелер",
+                kk: "Растаушы құжаттар",
+                ru: "Подтверждающие документы",
+                en: "Supporting documents",
+                defKK: "Жеңілдіктерді немесе жұмыс өтілін дәлелдейтін ресми құжаттар топтамасы.",
+                defRU: "Официальные документы, подтверждающие право на льготы или факт трудоустройства.",
+                defEN: "Official documentation or proofs validating eligibility for exemptions or employment status."
+            }
+        ];
+
+        // UI Translations
+        const i18n = {
+            kk: {
+                appTitle: "Терминологиялық Глоссарий",
+                appSubtitle: "Грант түлектерінің жұмыспен өтеу ережелері (24KZ)",
+                searchPlaceholder: "Терминді, анықтаманы немесе кільт сөзді іздеу...",
+                categoryLabel: "Санат:",
+                exportLabel: "Экспорт",
+                addBtnText: "Жаңа термин",
+                termsFoundText: "термин табылды",
+                resetFiltersText: "Сүзгіні тазалау",
+                emptyTitle: "Ештеңе табылмады",
+                emptySubtitle: "Іздеу сұранысын немесе сүзгіні өзгертіп көргеніңіз жөн",
+                modalTitle: "Жаңа термин қосу",
+                allCategories: "Барлығы",
+                copySuccess: "Көшіріп алынды!",
+                termAdded: "Жаңа термин сәтті қосылды!",
+                actions: "Әрекеттер"
+            },
+            ru: {
+                appTitle: "Терминологический Глоссарий",
+                appSubtitle: "Правила отработки грантов выпускниками (24KZ)",
+                searchPlaceholder: "Поиск термина, определения или ключевого слова...",
+                categoryLabel: "Категория:",
+                exportLabel: "Экспорт",
+                addBtnText: "Новый термин",
+                termsFoundText: "терминов найдено",
+                resetFiltersText: "Сбросить фильтры",
+                emptyTitle: "Ничего не найдено",
+                emptySubtitle: "Попробуйте изменить поисковый запрос или фильтр",
+                modalTitle: "Добавить новый термин",
+                allCategories: "Все",
+                copySuccess: "Скопировано в буфер!",
+                termAdded: "Новый термин успешно добавлен!",
+                actions: "Действия"
+            },
+            en: {
+                appTitle: "Terminology Glossary",
+                appSubtitle: "Rules for Mandatory Employment of Graduates (24KZ)",
+                searchPlaceholder: "Search term, definition or keyword...",
+                categoryLabel: "Category:",
+                exportLabel: "Export",
+                addBtnText: "Add Term",
+                termsFoundText: "terms found",
+                resetFiltersText: "Reset filters",
+                emptyTitle: "No results found",
+                emptySubtitle: "Try modifying your search query or active filters",
+                modalTitle: "Add New Term",
+                allCategories: "All",
+                copySuccess: "Copied to clipboard!",
+                termAdded: "New term added successfully!",
+                actions: "Actions"
+            }
+        };
+
+        // Application State Variables
+        let terms = [];
+        let currentUILang = 'kk';
+        let searchQuery = '';
+        let selectedCategory = 'ALL';
+        let selectedLetter = 'ALL';
+        let viewMode = 'card'; // 'card' or 'table'
+
+        window.onload = function() {
+            loadTermsFromStorage();
+            renderCategories();
+            renderAlphabetBar();
+            applyFiltersAndRender();
+            updateUIStrings();
+        };
+
+        function loadTermsFromStorage() {
+            const saved = localStorage.getItem('glossary_terms_24kz');
+            if (saved) {
+                try {
+                    terms = JSON.parse(saved);
+                } catch(e) {
+                    terms = [...initialTerms];
+                }
+            } else {
+                terms = [...initialTerms];
+                saveTermsToStorage();
+            }
+        }
+
+        function saveTermsToStorage() {
+            localStorage.setItem('glossary_terms_24kz', JSON.stringify(terms));
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            const htmlClass = document.documentElement.classList;
+            const themeIcon = document.getElementById('themeIcon');
+            if (htmlClass.contains('dark')) {
+                htmlClass.remove('dark');
+                themeIcon.className = "fa-solid fa-moon text-lg";
+            } else {
+                htmlClass.add('dark');
+                themeIcon.className = "fa-solid fa-sun text-lg text-amber-400";
+            }
+        }
+
+        // UI Language Change
+        function changeUILanguage(lang) {
+            currentUILang = lang;
+            updateUIStrings();
+            renderCategories();
+            applyFiltersAndRender();
+        }
+
+        function updateUIStrings() {
+            const dict = i18n[currentUILang];
+            document.getElementById('appTitle').textContent = dict.appTitle;
+            document.getElementById('appSubtitle').textContent = dict.appSubtitle;
+            document.getElementById('searchInput').placeholder = dict.searchPlaceholder;
+            document.getElementById('categoryLabel').textContent = dict.categoryLabel;
+            document.getElementById('exportLabel').textContent = dict.exportLabel;
+            document.getElementById('addBtnText').textContent = dict.addBtnText;
+            document.getElementById('resetFiltersText').textContent = dict.resetFiltersText;
+            document.getElementById('emptyTitle').textContent = dict.emptyTitle;
+            document.getElementById('emptySubtitle').textContent = dict.emptySubtitle;
+            document.getElementById('modalTitle').textContent = dict.modalTitle;
+        }
+
+        // Render Categories
+        function renderCategories() {
+            const categories = ['ALL', ...new Set(terms.map(t => t.category))];
+            const container = document.getElementById('categoryContainer');
+            container.innerHTML = '';
+
+            categories.forEach(cat => {
+                const isSelected = selectedCategory === cat;
+                const btn = document.createElement('button');
+                btn.onclick = () => selectCategory(cat);
+                btn.className = `px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition ${
+                    isSelected 
+                        ? 'bg-sky-600 text-white shadow-sm' 
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                }`;
+                btn.textContent = cat === 'ALL' ? i18n[currentUILang].allCategories : cat;
+                container.appendChild(btn);
+            });
+        }
+
+        // Render Alphabet Filter Bar
+        function renderAlphabetBar() {
+            const alphabet = ['ALL', 'А', 'Б', 'В', 'Ғ', 'Д', 'Ж', 'З', 'К', 'М', 'О', 'Ө', 'Р', 'С', 'Т', 'Ү', 'Ф', 'A-Z'];
+            const container = document.getElementById('alphabetBar');
+            container.innerHTML = '';
+
+            alphabet.forEach(letter => {
+                const isSelected = selectedLetter === letter;
+                const btn = document.createElement('button');
+                btn.onclick = () => selectLetter(letter);
+                btn.className = `px-2 py-1 rounded-md text-xs font-semibold min-w-[28px] text-center transition ${
+                    isSelected 
+                        ? 'bg-sky-600 text-white' 
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`;
+                btn.textContent = letter === 'ALL' ? i18n[currentUILang].allCategories : letter;
+                container.appendChild(btn);
+            });
+        }
+
+        function selectCategory(cat) {
+            selectedCategory = cat;
+            renderCategories();
+            applyFiltersAndRender();
+        }
+
+        function selectLetter(letter) {
+            selectedLetter = letter;
+            renderAlphabetBar();
+            applyFiltersAndRender();
+        }
+
+        function handleSearch() {
+            const input = document.getElementById('searchInput');
+            searchQuery = input.value.trim().toLowerCase();
+            document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery === '');
+            applyFiltersAndRender();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            searchQuery = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            applyFiltersAndRender();
+        }
+
+        function resetFilters() {
+            searchQuery = '';
+            selectedCategory = 'ALL';
+            selectedLetter = 'ALL';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            renderCategories();
+            renderAlphabetBar();
+            applyFiltersAndRender();
+        }
+
+        // Filtering Engine
+        function applyFiltersAndRender() {
+            let filtered = terms.filter(term => {
+                // Category match
+                if (selectedCategory !== 'ALL' && term.category !== selectedCategory) return false;
+
+                // Letter match
+                if (selectedLetter !== 'ALL') {
+                    if (selectedLetter === 'A-Z') {
+                        const firstChar = term.en.charAt(0).toUpperCase();
+                        if (!/[A-Z]/.test(firstChar)) return false;
+                    } else {
+                        const firstCharKK = term.kk.charAt(0).toUpperCase();
+                        const firstCharRU = term.ru.charAt(0).toUpperCase();
+                        if (firstCharKK !== selectedLetter && firstCharRU !== selectedLetter) return false;
+                    }
+                }
+
+                // Search query match across languages & definitions
+                if (searchQuery) {
+                    const matchKK = term.kk.toLowerCase().includes(searchQuery) || (term.defKK && term.defKK.toLowerCase().includes(searchQuery));
+                    const matchRU = term.ru.toLowerCase().includes(searchQuery) || (term.defRU && term.defRU.toLowerCase().includes(searchQuery));
+                    const matchEN = term.en.toLowerCase().includes(searchQuery) || (term.defEN && term.defEN.toLowerCase().includes(searchQuery));
+                    return matchKK || matchRU || matchEN;
+                }
+
+                return true;
+            });
+
+            // Update UI Counters
+            document.getElementById('resultsCount').textContent = filtered.length;
+            const isFilterActive = searchQuery !== '' || selectedCategory !== 'ALL' || selectedLetter !== 'ALL';
+            document.getElementById('activeFiltersBadge').classList.toggle('hidden', !isFilterActive);
+
+            // Render Views
+            if (filtered.length === 0) {
+                document.getElementById('cardViewContainer').classList.add('hidden');
+                document.getElementById('tableViewContainer').classList.add('hidden');
+                document.getElementById('emptyState').classList.remove('hidden');
+            } else {
+                document.getElementById('emptyState').classList.add('hidden');
+                if (viewMode === 'card') {
+                    document.getElementById('cardViewContainer').classList.remove('hidden');
+                    document.getElementById('tableViewContainer').classList.add('hidden');
+                    renderCardView(filtered);
+                } else {
+                    document.getElementById('cardViewContainer').classList.add('hidden');
+                    document.getElementById('tableViewContainer').classList.remove('hidden');
+                    renderTableView(filtered);
+                }
+            }
+        }
+
+        function renderCardView(data) {
+            const container = document.getElementById('cardViewContainer');
+            container.innerHTML = '';
+
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700/80 hover:shadow-md transition flex flex-col justify-between space-y-4";
+                
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <!-- Category & Audio Bar -->
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 rounded-lg text-[11px] font-semibold border border-sky-100 dark:border-sky-800/50">
+                                ${item.category}
+                            </span>
+                            <div class="flex items-center space-x-1">
+                                <button onclick="copyTerm('${item.id}')" title="Көшіру" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                                <button onclick="deleteTerm('${item.id}')" title="Жою" class="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Kazakh -->
+                        <div class="border-b border-slate-100 dark:border-slate-700/60 pb-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-slate-900 dark:text-white text-base">${highlightSearch(item.kk)}</span>
+                                <button onclick="speakText('${escapeQuotes(item.kk)}', 'kk-KZ')" class="text-sky-600 hover:text-sky-700 p-1 text-xs" title="Дыбыстау">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                </button>
+                            </div>
+                            ${item.defKK ? `<p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">${highlightSearch(item.defKK)}</p>` : ''}
+                        </div>
+
+                        <!-- Russian -->
+                        <div class="border-b border-slate-100 dark:border-slate-700/60 pb-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="font-medium text-slate-700 dark:text-slate-200 text-sm">${highlightSearch(item.ru)}</span>
+                                <button onclick="speakText('${escapeQuotes(item.ru)}', 'ru-RU')" class="text-blue-500 hover:text-blue-600 p-1 text-xs" title="Озвучить">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                </button>
+                            </div>
+                            ${item.defRU ? `<p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-2">${highlightSearch(item.defRU)}</p>` : ''}
+                        </div>
+
+                        <!-- English -->
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <span class="font-medium text-slate-600 dark:text-slate-300 text-sm italic">${highlightSearch(item.en)}</span>
+                                <button onclick="speakText('${escapeQuotes(item.en)}', 'en-US')" class="text-emerald-500 hover:text-emerald-600 p-1 text-xs" title="Pronounce">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                </button>
+                            </div>
+                            ${item.defEN ? `<p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-2">${highlightSearch(item.defEN)}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderTableView(data) {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = '';
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition";
+
+                row.innerHTML = `
+                    <td class="p-3 sm:p-4 font-semibold text-slate-800 dark:text-slate-100">
+                        <div class="flex items-center justify-between">
+                            <span>${highlightSearch(item.kk)}</span>
+                            <button onclick="speakText('${escapeQuotes(item.kk)}', 'kk-KZ')" class="text-sky-600 hover:text-sky-700 ml-1 text-xs">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="p-3 sm:p-4 text-slate-600 dark:text-slate-300">
+                        <div class="flex items-center justify-between">
+                            <span>${highlightSearch(item.ru)}</span>
+                            <button onclick="speakText('${escapeQuotes(item.ru)}', 'ru-RU')" class="text-blue-500 hover:text-blue-600 ml-1 text-xs">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="p-3 sm:p-4 text-slate-600 dark:text-slate-300 italic">
+                        <div class="flex items-center justify-between">
+                            <span>${highlightSearch(item.en)}</span>
+                            <button onclick="speakText('${escapeQuotes(item.en)}', 'en-US')" class="text-emerald-500 hover:text-emerald-600 ml-1 text-xs">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="p-3 sm:p-4">
+                        <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[11px] font-medium whitespace-nowrap">
+                            ${item.category}
+                        </span>
+                    </td>
+                    <td class="p-3 sm:p-4 text-center whitespace-nowrap">
+                        <button onclick="copyTerm('${item.id}')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 mr-1" title="Көшіру">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                        <button onclick="deleteTerm('${item.id}')" class="p-1 text-slate-400 hover:text-red-500" title="Жою">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                body.appendChild(row);
+            });
+        }
+
+        // Highlight helper
+        function highlightSearch(text) {
+            if (!searchQuery || !text) return text;
+            const regex = new RegExp(`(${escapeRegExp(searchQuery)})`, 'gi');
+            return text.replace(regex, `<mark class="bg-amber-200 dark:bg-amber-900/60 text-slate-900 dark:text-amber-100 rounded px-0.5">$1</mark>`);
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        // View Mode Switcher
+        function setViewMode(mode) {
+            viewMode = mode;
+            const cardBtn = document.getElementById('cardViewBtn');
+            const tableBtn = document.getElementById('tableViewBtn');
+
+            if (mode === 'card') {
+                cardBtn.className = "p-1.5 rounded-md text-xs font-medium transition bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm";
+                tableBtn.className = "p-1.5 rounded-md text-xs font-medium transition text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200";
+            } else {
+                tableBtn.className = "p-1.5 rounded-md text-xs font-medium transition bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm";
+                cardBtn.className = "p-1.5 rounded-md text-xs font-medium transition text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200";
+            }
+            applyFiltersAndRender();
+        }
+
+        function speakText(text, lang) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop current speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang;
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showToast("Дауыстап оқу мүмкіндігі браузеріңізде қолдау таппайды", "info");
+            }
+        }
+
+        // Copy Term
+        function copyTerm(id) {
+            const item = terms.find(t => t.id === id);
+            if (item) {
+                const formatted = `Қазақша: ${item.kk}\nРусский: ${item.ru}\nEnglish: ${item.en}`;
+                // Fallback execCommand for iframe compatibility
+                const tempInput = document.createElement("textarea");
+                tempInput.value = formatted;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
+
+                showToast(i18n[currentUILang].copySuccess, "success");
+            }
+        }
+
+        // Delete Term
+        function deleteTerm(id) {
+            terms = terms.filter(t => t.id !== id);
+            saveTermsToStorage();
+            renderCategories();
+            applyFiltersAndRender();
+            showToast("Термин өшірілді", "info");
+        }
+
+        function openModal() {
+            document.getElementById('termModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('termModal').classList.add('hidden');
+            document.getElementById('addTermForm').reset();
+        }
+
+        function saveTerm(event) {
+            event.preventDefault();
+            const category = document.getElementById('modalCategory').value;
+            const kk = document.getElementById('termKK').value.trim();
+            const defKK = document.getElementById('defKK').value.trim();
+            const ru = document.getElementById('termRU').value.trim();
+            const defRU = document.getElementById('defRU').value.trim();
+            const en = document.getElementById('termEN').value.trim();
+            const defEN = document.getElementById('defEN').value.trim();
+
+            const newTerm = {
+                id: Date.now().toString(),
+                category,
+                kk,
+                defKK,
+                ru,
+                defRU,
+                en,
+                defEN
+            };
+
+            terms.unshift(newTerm);
+            saveTermsToStorage();
+            renderCategories();
+            applyFiltersAndRender();
+            closeModal();
+            showToast(i18n[currentUILang].termAdded, "success");
+        }
+
+        function toggleExportMenu() {
+            const menu = document.getElementById('exportMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('exportMenu');
+            if (!e.target.closest('#exportMenu') && !e.target.closest('button[onclick="toggleExportMenu()"]')) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        function exportData(format) {
+            document.getElementById('exportMenu').classList.add('hidden');
+            if (format === 'json') {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(terms, null, 2));
+                downloadFile(dataStr, "glossary_terms.json");
+            } else if (format === 'csv') {
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // UTF-8 BOM
+                csvContent += "Category,Kazakh,Russian,English,Definition_KK,Definition_RU,Definition_EN\n";
+                terms.forEach(t => {
+                    const row = [
+                        `"${t.category}"`,
+                        `"${t.kk.replace(/"/g, '""')}"`,
+                        `"${t.ru.replace(/"/g, '""')}"`,
+                        `"${t.en.replace(/"/g, '""')}"`,
+                        `"${(t.defKK || '').replace(/"/g, '""')}"`,
+                        `"${(t.defRU || '').replace(/"/g, '""')}"`,
+                        `"${(t.defEN || '').replace(/"/g, '""')}"`
+                    ].join(",");
+                    csvContent += row + "\n";
+                });
+                downloadFile(csvContent, "glossary_terms.csv");
+            }
+        }
+
+        function downloadFile(content, fileName) {
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", content);
+            downloadAnchor.setAttribute("download", fileName);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // Toast Notification Helper
+        function showToast(msg, type = "success") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.textContent = msg;
+            if (type === "success") {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-sky-400 text-lg";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
